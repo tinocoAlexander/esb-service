@@ -1,12 +1,22 @@
-FROM openjdk:8-jdk-alpine
+#Etapa 1: Compilar con Maven
+FROM maven:3.6.9-eclipse-temurin-17 AS builder
 
-# Establecer el directorio de trabajo dentro del contenedor
 WORKDIR /app
 
-# Copiar lo que se genera en la carpeta target que tengo .jar
-COPY target/*.jar app.jar
+#Copiar archivos del proyecto y compilar
+COPY pom.xml .
 
-# Exponer el puerto 8081
-EXPOSE 8081
+COPY src ./src
 
-ENTRYPOINT [ "java", "-jar", "app.jar" ]
+RUN mvn clean package -DskipTests
+
+FROM openjdk:8-jdk-alpine
+
+#Establecer el directorio de trabajo dentro del contenedor
+WORKDIR /app
+
+COPY --from=builder /app/target/*.jar app.jar
+
+EXPOSE 8080
+
+ENTRYPOINT ["java","-jar","app.jar"]
