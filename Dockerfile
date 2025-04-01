@@ -1,15 +1,21 @@
-FROM maven:3.8.7-openjdk-8 AS builder
+FROM maven:3.9.6-eclipse-temurin-17 AS builder
 
 WORKDIR /app
-COPY pom.xml .
+
+COPY pom.xml  .
+
 COPY src ./src
 
-RUN mvn clean package -DskipTests
+RUN mvn clean install -Dmaven.test.skip=true
 
-FROM openjdk:8-jdk
 
+FROM openjdk:8-jdk-alpine
+
+#Establecer el directorio de trabajo dentro del contenedor
 WORKDIR /app
+
 COPY --from=builder /app/target/*.jar app.jar
 
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+
+ENTRYPOINT ["java","-jar","app.jar"]
