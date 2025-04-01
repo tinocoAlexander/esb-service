@@ -63,7 +63,7 @@ public class ESBController {
             return ResponseEntity.status(401).body("Token invalido o expirado");
         }
         String response = webClient.get()
-                .uri("http://users.railway.internal/app/users/all")
+                .uri("http://users.railway.internal:3000/app/users/all")
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .retrieve()
                 .bodyToMono(String.class)
