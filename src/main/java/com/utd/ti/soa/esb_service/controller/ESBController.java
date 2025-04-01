@@ -41,7 +41,7 @@ public class ESBController {
 
         try {
             String response = webClient.post()
-                    .uri("http://users:3000/app/users/create")
+                    .uri("http://users.railway.internal:3000/app/users/create")
                     .body(BodyInserters.fromValue(user))
                     .retrieve()
                     .onStatus(HttpStatus::isError, clientResponse -> 
@@ -63,7 +63,7 @@ public class ESBController {
             return ResponseEntity.status(401).body("Token invalido o expirado");
         }
         String response = webClient.get()
-                .uri("http://users:3000/app/users/all")
+                .uri("http://users.railway.internal:3000/app/users/all")
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .retrieve()
                 .bodyToMono(String.class)
@@ -84,7 +84,7 @@ public class ESBController {
         }
 
         String response = webClient.patch()
-                .uri("http://users:3000/app/users/update/" + id)
+                .uri("http://users.railway.internal:3000/app/users/update/" + id)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .bodyValue(userPayload)
                 .retrieve()
@@ -105,7 +105,7 @@ public class ESBController {
         }
 
         String response = webClient.delete()
-                .uri("http://users:3000/app/users/delete/" + id)
+                .uri("http://users.railway.internal:3000/app/users/delete/" + id)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .retrieve()
                 .bodyToMono(String.class)

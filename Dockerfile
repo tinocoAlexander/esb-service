@@ -10,7 +10,7 @@ COPY src ./src
 
 RUN mvn clean package -DskipTests
 
-FROM openjdk:8-jdk-alpine
+FROM adoptopenjdk/openjdk8:alpine
 
 #Establecer el directorio de trabajo dentro del contenedor
 WORKDIR /app
