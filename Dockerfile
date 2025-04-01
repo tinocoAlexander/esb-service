@@ -1,22 +1,15 @@
-#Etapa 1: Compilar con Maven
-FROM maven:3.6.9-eclipse-temurin-17 AS builder
+FROM maven:3.8.7-openjdk-8 AS builder
 
 WORKDIR /app
-
-#Copiar archivos del proyecto y compilar
 COPY pom.xml .
-
 COPY src ./src
 
 RUN mvn clean package -DskipTests
 
-FROM eclipse-temurin:8-jdk-alpine
+FROM openjdk:8-jdk
 
-#Establecer el directorio de trabajo dentro del contenedor
 WORKDIR /app
-
 COPY --from=builder /app/target/*.jar app.jar
 
 EXPOSE 8080
-
-ENTRYPOINT ["java","-jar","app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
