@@ -10,7 +10,7 @@ COPY src ./src
 
 RUN mvn clean package -DskipTests
 
-FROM adoptopenjdk/openjdk8:alpine
+FROM eclipse-temurin:8-jdk-alpine
 
 #Establecer el directorio de trabajo dentro del contenedor
 WORKDIR /app
