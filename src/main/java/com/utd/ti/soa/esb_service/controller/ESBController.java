@@ -115,6 +115,16 @@ public class ESBController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/user/recover")
+    public ResponseEntity<String> recoverPassword(@RequestBody String payload) {
+        String response = webClient.post()
+                .uri("http://users.railway.internal:3000/app/users/recover")
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .bodyValue(payload)
+                .retrieve().bodyToMono(String.class).block();
+        return ResponseEntity.ok(response);
+    }
+
     // Rutas para clientes
     @PostMapping("/client")
     public ResponseEntity<String> createClient(@RequestBody Object client, 
@@ -288,6 +298,45 @@ public class ESBController {
                 .doOnError(error -> System.out.println("Error: " + error.getMessage()))
                 .block();
 
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/order")
+    public ResponseEntity<String> createOrder(@RequestBody Object order, @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
+        if (!auth.validateToken(token)) return ResponseEntity.status(401).body("Token invalido o expirado");
+        String response = webClient.post()
+                .uri("http://orders.railway.internal:3000/app/orders/create")
+                .body(BodyInserters.fromValue(order)).retrieve().bodyToMono(String.class).block();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/order/{id}")
+    public ResponseEntity<String> getOrderById(@PathVariable("id") Long id, @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
+        if (!auth.validateToken(token)) return ResponseEntity.status(401).body("Token invalido o expirado");
+        String response = webClient.get()
+                .uri("http://orders.railway.internal:3000/app/orders/" + id)
+                .retrieve().bodyToMono(String.class).block();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/order/client/{clientId}")
+    public ResponseEntity<String> getOrdersByClient(@PathVariable("clientId") Long clientId,
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
+        if (!auth.validateToken(token)) return ResponseEntity.status(401).body("Token invalido o expirado");
+        String response = webClient.get()
+                .uri("http://orders.railway.internal:3000/app/orders/client/" + clientId)
+                .retrieve().bodyToMono(String.class).block();
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/order/status/{id}")
+    public ResponseEntity<String> updateOrderStatus(@PathVariable("id") Long id, @RequestBody String payload,
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
+        if (!auth.validateToken(token)) return ResponseEntity.status(401).body("Token invalido o expirado");
+        String response = webClient.patch()
+                .uri("http://orders.railway.internal:3000/app/orders/status/" + id)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .bodyValue(payload).retrieve().bodyToMono(String.class).block();
         return ResponseEntity.ok(response);
     }
 
