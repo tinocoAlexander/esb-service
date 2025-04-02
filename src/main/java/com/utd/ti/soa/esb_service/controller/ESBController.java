@@ -201,4 +201,94 @@ public class ESBController {
     
         return ResponseEntity.ok(response);
     }
+
+    // Rutas para productos
+    @PostMapping("/product")
+    public ResponseEntity<String> createProduct(
+            @RequestBody Object product,
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
+
+        System.out.println("Request Body " + product);
+        System.out.println("Token recibido " + token);
+
+        if (!auth.validateToken(token)) {
+            return ResponseEntity.status(401).body("Token invalido o expirado");
+        }
+
+        try {
+            String response = webClient.post()
+                    .uri("http://products.railway.internal:3000/app/products/create")
+                    .body(BodyInserters.fromValue(product))
+                    .retrieve()
+                    .onStatus(HttpStatus::isError, clientResponse ->
+                            clientResponse.bodyToMono(String.class)
+                                    .flatMap(errorBody -> Mono.error(new RuntimeException(errorBody))))
+                    .bodyToMono(String.class)
+                    .block();
+
+            return ResponseEntity.ok(response);
+
+        } catch (WebClientResponseException e) {
+            return ResponseEntity.status(e.getRawStatusCode()).body(e.getResponseBodyAsString());
+        }
+    }
+
+    @GetMapping("/product/get")
+    public ResponseEntity<String> getProducts(@RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
+        if (!auth.validateToken(token)) {
+            return ResponseEntity.status(401).body("Token invalido o expirado");
+        }
+        String response = webClient.get()
+                .uri("http://products.railway.internal:3000/app/products/all")
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .retrieve()
+                .bodyToMono(String.class)
+                .doOnError(error -> System.out.println("Error: " + error.getMessage()))
+                .block();
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/product/update/{id}")
+    public ResponseEntity<String> updateProduct(
+            @PathVariable("id") Long id,
+            @RequestBody String productPayload,
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
+
+        System.out.println("Payload recibido: " + productPayload);
+        if (!auth.validateToken(token)) {
+            return ResponseEntity.status(401).body("Token invalido o expirado");
+        }
+
+        String response = webClient.patch()
+                .uri("http://products.railway.internal:3000/app/products/update/" + id)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .bodyValue(productPayload)
+                .retrieve()
+                .bodyToMono(String.class)
+                .doOnError(error -> System.out.println("Error: " + error.getMessage()))
+                .block();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/product/delete/{id}")
+    public ResponseEntity<String> deleteProduct(
+            @PathVariable("id") Long id,
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
+
+        if (!auth.validateToken(token)) {
+            return ResponseEntity.status(401).body("Token invalido o expirado");
+        }
+
+        String response = webClient.delete()
+                .uri("http://products.railway.internal:3000/app/products/delete/" + id)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .retrieve()
+                .bodyToMono(String.class)
+                .doOnError(error -> System.out.println("Error: " + error.getMessage()))
+                .block();
+
+        return ResponseEntity.ok(response);
+    }
+
 }
