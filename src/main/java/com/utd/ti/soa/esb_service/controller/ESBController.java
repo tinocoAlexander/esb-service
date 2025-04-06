@@ -140,12 +140,11 @@ public class ESBController {
         }
     }
 
-    @PostMapping("/user/login/{id}")
-    public ResponseEntity<String> loginUser(@PathVariable("id") Long id,
-                                            @RequestBody String payload) {
+    @PostMapping("/user/login")
+    public ResponseEntity<String> loginUser(@RequestBody String payload) {
         try {
             String response = webClient.post()
-                    .uri("http://users.railway.internal:3000/app/users/login/" + id)
+                    .uri("http://users.railway.internal:3000/app/users/login") // <--- CAMBIADO
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                     .bodyValue(payload)
                     .retrieve()
@@ -153,6 +152,7 @@ public class ESBController {
                     .block();
 
             return ResponseEntity.ok(response);
+
         } catch (WebClientResponseException e) {
             return ResponseEntity.status(e.getRawStatusCode()).body(e.getResponseBodyAsString());
         }
