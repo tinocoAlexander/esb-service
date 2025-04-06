@@ -37,25 +37,17 @@ public class ESBController {
         System.out.println("Request Body " + user);
         System.out.println("Token recibido " + token);
 
-        if (!auth.validateToken(token)) {
-            return ResponseEntity.status(401).body("Token invalido o expirado");
-        }
-
         try {
             String response = webClient.post()
                     .uri("http://users.railway.internal:3000/app/users/create")
                     .body(BodyInserters.fromValue(user))
                     .retrieve()
-                    .onStatus(HttpStatus::isError, clientResponse ->
-                            clientResponse.bodyToMono(String.class)
-                                    .flatMap(errorBody -> Mono.error(new RuntimeException(errorBody))))
                     .bodyToMono(String.class)
                     .block();
 
             return ResponseEntity.ok(response);
 
         } catch (WebClientResponseException e) {
-            // Devuelve el cuerpo de error en la respuesta
             return ResponseEntity.status(e.getRawStatusCode()).body(e.getResponseBodyAsString());
         }
     }
@@ -132,7 +124,6 @@ public class ESBController {
 
     @PostMapping("/user/recover")
     public ResponseEntity<String> recoverPassword(@RequestBody String payload) {
-
         try {
             String response = webClient.post()
                     .uri("http://users.railway.internal:3000/app/users/recover")
@@ -144,6 +135,24 @@ public class ESBController {
 
             return ResponseEntity.ok(response);
 
+        } catch (WebClientResponseException e) {
+            return ResponseEntity.status(e.getRawStatusCode()).body(e.getResponseBodyAsString());
+        }
+    }
+
+    @PostMapping("/user/login/{id}")
+    public ResponseEntity<String> loginUser(@PathVariable("id") Long id,
+                                            @RequestBody String payload) {
+        try {
+            String response = webClient.post()
+                    .uri("http://users.railway.internal:3000/app/users/login/" + id)
+                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .bodyValue(payload)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
+
+            return ResponseEntity.ok(response);
         } catch (WebClientResponseException e) {
             return ResponseEntity.status(e.getRawStatusCode()).body(e.getResponseBodyAsString());
         }
@@ -430,6 +439,28 @@ public class ESBController {
                     .uri("http://orders.railway.internal:3000/app/orders/status/" + id)
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                     .bodyValue(payload)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
+
+            return ResponseEntity.ok(response);
+
+        } catch (WebClientResponseException e) {
+            return ResponseEntity.status(e.getRawStatusCode()).body(e.getResponseBodyAsString());
+        }
+    }
+
+    @DeleteMapping("/order/{id}")
+    public ResponseEntity<String> cancelOrder(@PathVariable("id") Long id,
+                                            @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
+        if (!auth.validateToken(token)) {
+            return ResponseEntity.status(401).body("Token invalido o expirado");
+        }
+
+        try {
+            String response = webClient.delete()
+                    .uri("http://orders.railway.internal:3000/app/orders/" + id)
+                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                     .retrieve()
                     .bodyToMono(String.class)
                     .block();
