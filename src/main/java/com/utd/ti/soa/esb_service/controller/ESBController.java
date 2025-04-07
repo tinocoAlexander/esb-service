@@ -32,18 +32,16 @@ public class ESBController {
     // ---------------------- USUARIOS ----------------------
 
     @PostMapping("/user")
-    public ResponseEntity<String> createUser(@RequestBody User user,
-                                            @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
+    public ResponseEntity<String> createUser(@RequestBody User user) {
         System.out.println("Request Body " + user);
-        System.out.println("Token recibido " + token);
 
         try {
             String response = webClient.post()
-                    .uri("http://users.railway.internal:3000/app/users/create")
-                    .body(BodyInserters.fromValue(user))
-                    .retrieve()
-                    .bodyToMono(String.class)
-                    .block();
+                .uri("http://users.railway.internal:3000/app/users/create")
+                .body(BodyInserters.fromValue(user))
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
 
             return ResponseEntity.ok(response);
 
