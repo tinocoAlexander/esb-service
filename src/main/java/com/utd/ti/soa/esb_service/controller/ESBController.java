@@ -159,14 +159,8 @@ public class ESBController {
     // ---------------------- CLIENTES ----------------------
 
     @PostMapping("/client")
-    public ResponseEntity<String> createClient(@RequestBody Object client,
-                                              @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
+    public ResponseEntity<String> createClient(@RequestBody Object client) {
         System.out.println("Request Body " + client);
-        System.out.println("Token recibido " + token);
-
-        if (!auth.validateToken(token)) {
-            return ResponseEntity.status(401).body("Token invalido o expirado");
-        }
 
         try {
             String response = webClient.post()
@@ -185,6 +179,7 @@ public class ESBController {
             return ResponseEntity.status(e.getRawStatusCode()).body(e.getResponseBodyAsString());
         }
     }
+
 
     @GetMapping("/client/get")
     public ResponseEntity<String> getClients(@RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
